@@ -1,0 +1,4 @@
+enum OTPType {
+  VERIFICATION
+  PASSWORD_RESET
+}

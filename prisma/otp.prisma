@@ -1,0 +1,13 @@
+model OTP {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code       String
+  type       OTPType  @default(VERIFICATION) 
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  @@index([userId])
+  @@index([code])
+}

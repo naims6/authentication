@@ -1,5 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
+import notFound from "./middleware/notFound";
+import globalError from "./middleware/globalError";
+import { AuthRoutes } from "./modules/auth/auth.routes";
 const app: Application = express();
 
 app.use(express.json());
@@ -13,5 +16,10 @@ app.get("/", (_req: Request, res: Response) => {
     time: new Date().toISOString(),
   });
 });
+
+app.use("/api/v1/auth", AuthRoutes);
+
+app.use(notFound);
+app.use(globalError);
 
 export default app;
