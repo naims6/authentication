@@ -4,3 +4,13 @@ export interface ErrorResponse {
   stack?: string;
   error?: any;
 }
+
+export interface JwtPayload {
+  userId: string;
+  email: string;
+}
+
+export interface RefreshTokenPayload {
+  userId: string;
+  sessionId: string;
+}

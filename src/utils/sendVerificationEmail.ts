@@ -4,7 +4,7 @@ import { sendMail } from "../config/nodemailer";
 export const sendVerificationEmail = async (
   email: string,
   fullName: string,
-  otp: number,
+  otp: string,
   expiriedIn: number = 5,
 ) => {
   const emailBody = verificationEmailTemplate(otp, fullName, expiriedIn);

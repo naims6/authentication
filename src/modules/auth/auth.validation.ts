@@ -27,7 +27,7 @@ export const UserLoginSchema = z.object({
 });
 
 // Verify Email
-export const UserVerifySchema = z.object({
+export const EmailVerifySchema = z.object({
   email: z.email(),
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
@@ -42,3 +42,4 @@ export const ResetPasswordSchema = z.object({
 export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 export type UserLogin = z.infer<typeof UserLoginSchema>;
+export type EmailVerify = z.infer<typeof EmailVerifySchema>;

@@ -1,5 +1,5 @@
 export const verificationEmailTemplate = (
-  otp: number,
+  otp: string,
   fullName: string,
   expiriedIn: number,
 ) => {

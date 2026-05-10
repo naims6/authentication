@@ -2,6 +2,7 @@ import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { ErrorResponse } from "../types";
+import config from "../config/env";
 
 const globalError: ErrorRequestHandler = (
   err: any,
@@ -149,7 +150,7 @@ const globalError: ErrorRequestHandler = (
   };
 
   //   only for development environment, include stack and error details
-  if (process.env.NODE_ENV === "development") {
+  if (config.node_env === "development") {
     response.stack = err.stack;
     response.error = err;
   }

@@ -5,9 +5,7 @@ model OTP {
   code       String
   type       OTPType  @default(VERIFICATION) 
   expiresAt  DateTime
-  used       Boolean  @default(false)
   createdAt  DateTime @default(now())
-  
-  @@index([userId])
-  @@index([code])
+
+  @@unique([userId, type])
 }

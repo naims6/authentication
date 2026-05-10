@@ -8,7 +8,6 @@ CREATE TABLE "OTP" (
     "code" TEXT NOT NULL,
     "type" "OTPType" NOT NULL DEFAULT 'VERIFICATION',
     "expiresAt" TIMESTAMP(3) NOT NULL,
-    "used" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "OTP_pkey" PRIMARY KEY ("id")
@@ -43,10 +42,7 @@ CREATE TABLE "User" (
 );
 
 -- CreateIndex
-CREATE INDEX "OTP_userId_idx" ON "OTP"("userId");
-
--- CreateIndex
-CREATE INDEX "OTP_code_idx" ON "OTP"("code");
+CREATE UNIQUE INDEX "OTP_userId_type_key" ON "OTP"("userId", "type");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_refreshToken_key" ON "Session"("refreshToken");
