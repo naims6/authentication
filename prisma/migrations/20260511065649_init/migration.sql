@@ -18,6 +18,7 @@ CREATE TABLE "Session" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "refreshToken" TEXT NOT NULL,
+    "sessionId" TEXT NOT NULL,
     "deviceInfo" TEXT,
     "ipAddress" TEXT,
     "expiresAt" TIMESTAMP(3) NOT NULL,
@@ -48,16 +49,13 @@ CREATE UNIQUE INDEX "OTP_userId_type_key" ON "OTP"("userId", "type");
 CREATE UNIQUE INDEX "Session_refreshToken_key" ON "Session"("refreshToken");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Session_sessionId_key" ON "Session"("sessionId");
+
+-- CreateIndex
 CREATE INDEX "Session_userId_idx" ON "Session"("userId");
 
 -- CreateIndex
-CREATE INDEX "Session_refreshToken_idx" ON "Session"("refreshToken");
-
--- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- CreateIndex
-CREATE INDEX "User_email_idx" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "OTP" ADD CONSTRAINT "OTP_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

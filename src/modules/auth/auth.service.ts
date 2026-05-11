@@ -11,6 +11,7 @@ import {
   createAccessToken,
   createRefreshToken,
   generateSessionId,
+  verifyRefreshToken,
 } from "./auth.helper";
 
 const registerUser = async (payload: UserCreate) => {
@@ -53,7 +54,6 @@ const verifyEmail = async (payload: EmailVerify) => {
   const { email, otp } = payload;
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, isVerified: true, fullName: true },
   });
 
   if (!user) {
@@ -83,7 +83,7 @@ const verifyEmail = async (payload: EmailVerify) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "Wrong OTP");
   }
 
-  await prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: { id: user.id },
     data: { isVerified: true },
   });
@@ -92,7 +92,42 @@ const verifyEmail = async (payload: EmailVerify) => {
     where: { id: otpRecord.id },
   });
 
-  return user;
+  return updatedUser;
+};
+
+const resendOtp = async (email: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (!user) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
+  }
+
+  const otp = generateOTP();
+  const hashedOTP = await hashOTP(otp);
+
+  const otpRecord = await prisma.oTP.upsert({
+    where: {
+      userId_type: {
+        userId: user.id,
+        type: OTPType.VERIFICATION,
+      },
+    },
+    update: {
+      code: hashedOTP,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+    create: {
+      userId: user.id,
+      code: hashedOTP,
+      type: OTPType.VERIFICATION,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+  });
+
+  await sendVerificationEmail(user.email, user.fullName, otp);
+
+  return otpRecord;
 };
 
 const loginUser = async (payload: UserLogin) => {
@@ -137,16 +172,61 @@ const loginUser = async (payload: UserLogin) => {
     sessionId,
   });
 
+  const session = await prisma.session.create({
+    data: {
+      userId: user.id,
+      refreshToken,
+      sessionId,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+    },
+  });
   return { accessToken, refreshToken };
 };
 
 const logoutUser = async (userId: string, refreshToken: string) => {
+  const isRefreshTokenValid = verifyRefreshToken(refreshToken);
+  if (!isRefreshTokenValid) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+  }
 
-}
+  const session = await prisma.session.findUnique({
+    where: {
+      refreshToken: refreshToken,
+    },
+  });
+
+  if (!session) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+  }
+
+  await prisma.session.delete({
+    where: {
+      refreshToken,
+    },
+  });
+
+  return session;
+};
+
+const logoutAllDevice = async (userId: string) => {
+  const result = await prisma.session.deleteMany({
+    where: {
+      userId,
+    },
+  });
+
+  if (result.count === 0) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "No session found");
+  }
+
+  return result;
+};
 
 export const AuthService = {
   registerUser,
   loginUser,
   verifyEmail,
+  resendOtp,
   logoutUser,
+  logoutAllDevice,
 };
