@@ -5,9 +5,9 @@ export const sendVerificationEmail = async (
   email: string,
   fullName: string,
   otp: string,
-  expiriedIn: number = 5,
+  expiresIn: number = 5,
 ) => {
-  const emailBody = verificationEmailTemplate(otp, fullName, expiriedIn);
+  const emailBody = verificationEmailTemplate(otp, fullName, expiresIn);
 
   await sendMail(email, "Email Verification", emailBody);
 };

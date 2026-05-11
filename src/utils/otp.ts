@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
+import { randomInt } from "crypto";
 
 export const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(0, 1_000_000).toString().padStart(6, "0");
 };
 
 export const hashOTP = (otp: string) => {

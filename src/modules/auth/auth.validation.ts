@@ -29,7 +29,7 @@ export const UserLoginSchema = z.object({
 // Verify Email
 export const EmailVerifySchema = z.object({
   email: z.email(),
-  otp: z.string().length(6, "OTP must be 6 digits"),
+  otp: z.string().regex(/^\d{6}$/, "OTP must be 6 digits"),
 });
 
 // Password Reset

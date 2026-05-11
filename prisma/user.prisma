@@ -9,7 +9,5 @@ model User {
   updatedAt         DateTime  @updatedAt
   sessions          Session[]
   otps              OTP[]
-  
-  @@index([email])
 }
 

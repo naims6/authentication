@@ -125,13 +125,13 @@ const loginUser = async (payload: UserLogin) => {
     );
   }
 
-  const JwtPayload: JwtPayload = {
+  const jwtPayload: JwtPayload = {
     userId: user.id,
     email: user.email,
   };
 
   const sessionId = generateSessionId();
-  const accessToken = createAccessToken(JwtPayload);
+  const accessToken = createAccessToken(jwtPayload);
   const refreshToken = createRefreshToken({
     userId: user.id,
     sessionId,
