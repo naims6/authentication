@@ -6,7 +6,7 @@ import { generateOTP, hashOTP, verifyOTP } from "../../utils/otp";
 import { sendVerificationEmail } from "../../utils/sendVerificationEmail";
 import { EmailVerify, UserCreate, UserLogin } from "./auth.validation";
 import { OTPType } from "@prisma/client";
-import { JwtPayload } from "../../types";
+import { JwtPayload, RefreshTokenPayload } from "../../types";
 import {
   createAccessToken,
   createRefreshToken,
@@ -95,6 +95,36 @@ const verifyEmail = async (payload: EmailVerify) => {
   return updatedUser;
 };
 
+const refreshToken = async (refreshToken: string) => {
+  const refreshTokenPayload = verifyRefreshToken(refreshToken);
+  if (!refreshTokenPayload) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+  }
+
+  const newAccessToken = createAccessToken({
+    userId: refreshTokenPayload.userId,
+    email: refreshTokenPayload.email,
+  });
+
+  const newRefreshToken = createRefreshToken({
+    userId: refreshTokenPayload.userId,
+    email: refreshTokenPayload.email,
+    sessionId: refreshTokenPayload.sessionId,
+  });
+
+  const session = await prisma.session.update({
+    where: {
+      refreshToken: refreshToken,
+    },
+    data: {
+      refreshToken: newRefreshToken,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+    },
+  });
+
+  return { newAccessToken, newRefreshToken };
+};
+
 const resendOtp = async (email: string) => {
   const user = await prisma.user.findUnique({
     where: { email },
@@ -169,6 +199,7 @@ const loginUser = async (payload: UserLogin) => {
   const accessToken = createAccessToken(jwtPayload);
   const refreshToken = createRefreshToken({
     userId: user.id,
+    email: user.email,
     sessionId,
   });
 
@@ -226,6 +257,7 @@ export const AuthService = {
   registerUser,
   loginUser,
   verifyEmail,
+  refreshToken,
   resendOtp,
   logoutUser,
   logoutAllDevice,

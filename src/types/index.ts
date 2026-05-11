@@ -12,5 +12,6 @@ export interface JwtPayload {
 
 export interface RefreshTokenPayload {
   userId: string;
+  email: string;
   sessionId: string;
 }

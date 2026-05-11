@@ -3,8 +3,8 @@ import config from "../../config/env";
 import { JwtPayload, RefreshTokenPayload } from "../../types";
 
 export const createAccessToken = (payload: JwtPayload) => {
-  return jwt.sign(payload, config.jwt_secret, {
-    expiresIn: "15m",
+  return jwt.sign(payload, config.jwt_access_secret, {
+    expiresIn: "5m",
   });
 };
 
@@ -15,7 +15,7 @@ export const createRefreshToken = (payload: RefreshTokenPayload) => {
 };
 
 export const verifyAccessToken = (token: string) => {
-  return jwt.verify(token, config.jwt_secret) as JwtPayload;
+  return jwt.verify(token, config.jwt_access_secret) as JwtPayload;
 };
 
 export const verifyRefreshToken = (token: string) => {

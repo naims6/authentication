@@ -17,6 +17,8 @@ router.post(
   AuthController.register,
 );
 
+router.post("/refresh-token", isAuthenticated, AuthController.refreshToken);
+
 router.post(
   "/verify-email",
   validateRequest(EmailVerifySchema),

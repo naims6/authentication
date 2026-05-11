@@ -16,6 +16,33 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   ApiResponse.success(res, result, "Email verified successfully");
 });
 
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const refreshToken = req.cookies.refreshToken;
+  const { newAccessToken, newRefreshToken } =
+    await AuthService.refreshToken(refreshToken);
+
+  res.cookie("accessToken", newAccessToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 15,
+  });
+
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
+
+  ApiResponse.success(
+    res,
+    null,
+    "Access and refresh tokens generated successfully",
+  );
+});
+
 const resendOtp = catchAsync(async (req: Request, res: Response) => {
   const { email } = req.body;
   const result = await AuthService.resendOtp(email);
@@ -83,6 +110,7 @@ export const AuthController = {
   register,
   login,
   verifyEmail,
+  refreshToken,
   resendOtp,
   logout,
   logoutAllDevices,
