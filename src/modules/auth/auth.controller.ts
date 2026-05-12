@@ -165,7 +165,6 @@ const getAllSessions = catchAsync(async (req: Request, res: Response) => {
 const logout = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.userId;
   const refreshToken = req.cookies.refreshToken;
-  console.log(userId, refreshToken);
 
   if (!userId) {
     throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");

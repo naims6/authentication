@@ -345,10 +345,8 @@ const loginUser = async (
   sessionInfo: IResult,
   ip: string,
 ) => {
-  console.log({ sessionInfo, ip });
   const deviceName = sessionInfo.os.name || "Unknown OS";
   const browserName = sessionInfo.browser.name || "Unknown Browser";
-  console.log(deviceName, browserName);
 
   const { email, password } = payload;
   const user = await prisma.user.findUnique({
