@@ -4,7 +4,12 @@ import AppError from "../../utils/AppError";
 import { hashPassword, verifyPassword } from "../../utils/hashPassword";
 import { generateOTP, hashOTP, verifyOTP } from "../../utils/otp";
 import { sendVerificationEmail } from "../../utils/sendVerificationEmail";
-import { EmailVerify, UserCreate, UserLogin } from "./auth.validation";
+import {
+  ChangePassword,
+  EmailVerify,
+  UserCreate,
+  UserLogin,
+} from "./auth.validation";
 import { OTPType } from "@prisma/client";
 import { JwtPayload, RefreshTokenPayload } from "../../types";
 import {
@@ -160,6 +165,66 @@ const resendOtp = async (email: string) => {
   return otpRecord;
 };
 
+const changePassword = async (
+  userId: string,
+  payload: ChangePassword,
+  refreshToken: string,
+) => {
+  const { oldPassword, newPassword, confirmPassword } = payload;
+
+  if (oldPassword === newPassword) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Old password and new password cannot be the same",
+    );
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "New password and confirm password do not match",
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
+  }
+
+  const isPasswordValid = await verifyPassword(oldPassword, user.password);
+  if (!isPasswordValid) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid old password");
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
+  });
+
+  const removeOtherSessions = await prisma.session.deleteMany({
+    where: { userId: userId, NOT: { refreshToken } },
+  });
+
+  const newAccessToken = createAccessToken({
+    userId: updatedUser.id,
+    email: updatedUser.email,
+  });
+
+  const sessionId = generateSessionId();
+  const newRefreshToken = createRefreshToken({
+    userId: updatedUser.id,
+    email: updatedUser.email,
+    sessionId,
+  });
+
+  return { newAccessToken, newRefreshToken };
+};
+
 const loginUser = async (payload: UserLogin) => {
   const { email, password } = payload;
   const user = await prisma.user.findUnique({
@@ -258,6 +323,7 @@ export const AuthService = {
   loginUser,
   verifyEmail,
   refreshToken,
+  changePassword,
   resendOtp,
   logoutUser,
   logoutAllDevice,

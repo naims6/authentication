@@ -37,6 +37,13 @@ export const ResendOtpSchema = z.object({
   email: z.email(),
 });
 
+// change password
+export const ChangePasswordSchema = z.object({
+  oldPassword: z.string().min(6),
+  newPassword: z.string().min(6),
+  confirmPassword: z.string().min(6),
+});
+
 // Password Reset
 export const ResetPasswordSchema = z.object({
   email: z.email(),
@@ -48,3 +55,4 @@ export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 export type UserLogin = z.infer<typeof UserLoginSchema>;
 export type EmailVerify = z.infer<typeof EmailVerifySchema>;
+export type ChangePassword = z.infer<typeof ChangePasswordSchema>;

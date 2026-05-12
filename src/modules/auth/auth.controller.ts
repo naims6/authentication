@@ -49,6 +49,43 @@ const resendOtp = catchAsync(async (req: Request, res: Response) => {
   ApiResponse.success(res, result, "OTP sent successfully");
 });
 
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const isProduction = process.env.NODE_ENV === "production";
+
+  const refreshToken = req.cookies.refreshToken;
+  const userId = req.user?.userId;
+  
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
+
+  const { newAccessToken, newRefreshToken } = await AuthService.changePassword(
+    userId,
+    req.body,
+    refreshToken,
+  );
+
+  res.cookie("accessToken", newAccessToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 15,
+  });
+
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
+
+  ApiResponse.success(
+    res,
+    { newAccessToken, newRefreshToken },
+    "Password changed successfully",
+  );
+});
+
 const login = catchAsync(async (req: Request, res: Response) => {
   const isProduction = process.env.NODE_ENV === "production";
   const { accessToken, refreshToken } = await AuthService.loginUser(req.body);
@@ -111,6 +148,7 @@ export const AuthController = {
   login,
   verifyEmail,
   refreshToken,
+  changePassword,
   resendOtp,
   logout,
   logoutAllDevices,
