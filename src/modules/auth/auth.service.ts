@@ -11,7 +11,7 @@ import {
   UserLogin,
 } from "./auth.validation";
 import { OTPType } from "@prisma/client";
-import { JwtPayload, RefreshTokenPayload } from "../../types";
+import { JwtPayload } from "../../types";
 import {
   createAccessToken,
   createRefreshToken,
@@ -357,11 +357,19 @@ const loginUser = async (
       fullName: true,
       password: true,
       isVerified: true,
+      status: true,
     },
   });
 
   if (!user) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid email or password");
+  }
+
+  if (user.status === "DELETED") {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Your account has been deleted",
+    );
   }
 
   const isPasswordValid = await verifyPassword(password, user.password);
@@ -470,6 +478,30 @@ const logoutAllDevice = async (userId: string) => {
   return result;
 };
 
+// User Part
+const deleteUserAccount = async (userId: string) => {
+  if (!userId) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User ID is required");
+  }
+
+  // TODO: Use Transaction
+  const deletedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      status: "DELETED",
+      deletedAt: new Date(),
+      deleteAfter: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+    select: { id: true, fullName: true, deletedAt: true },
+  });
+
+  await prisma.session.deleteMany({
+    where: { userId },
+  });
+
+  return deletedUser;
+};
+
 export const AuthService = {
   registerUser,
   loginUser,
@@ -484,4 +516,6 @@ export const AuthService = {
   logoutUser,
   logoutAllDevice,
   logoutSingleDevice,
+  // user related
+  deleteUserAccount,
 };

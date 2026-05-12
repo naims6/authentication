@@ -1,12 +1,16 @@
 -- CreateEnum
 CREATE TYPE "OTPType" AS ENUM ('VERIFICATION', 'PASSWORD_RESET');
 
+-- CreateEnum
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'BANNED', 'DELETED');
+
 -- CreateTable
 CREATE TABLE "OTP" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "type" "OTPType" NOT NULL DEFAULT 'VERIFICATION',
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -36,8 +40,14 @@ CREATE TABLE "User" (
     "fullName" TEXT NOT NULL,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "isBlocked" BOOLEAN NOT NULL DEFAULT false,
+    "isTrustedDevice" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
+    "deletedAt" TIMESTAMP(3),
+    "deleteAfter" TIMESTAMP(3),
+    "bannedUntil" TIMESTAMP(3),
+    "banReason" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

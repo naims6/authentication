@@ -86,4 +86,12 @@ router.post(
   AuthController.logoutAllDevices,
 );
 
+// User related routes
+// delete user account
+router.delete(
+  "/delete-account",
+  isAuthenticated,
+  AuthController.deleteUserAccount,
+);
+
 export const AuthRoutes = router;
