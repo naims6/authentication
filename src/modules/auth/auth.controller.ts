@@ -4,6 +4,7 @@ import catchAsync from "../../utils/catchAsync";
 import { AuthService } from "./auth.service";
 import AppError from "../../utils/AppError";
 import { StatusCodes } from "http-status-codes";
+import { UAParser } from "ua-parser-js";
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.registerUser(req.body);
@@ -109,7 +110,10 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   }
 
   if (newPassword !== confirmNewPassword) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "New password and confirm password do not match");
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "New password and confirm password do not match",
+    );
   }
 
   const result = await AuthService.resetPassword(resetToken, newPassword);
@@ -117,8 +121,16 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
+  const userAgent = req.headers["user-agent"];
+  const parser = new UAParser(userAgent);
+  const sessionInfo = parser.getResult();
+
   const isProduction = process.env.NODE_ENV === "production";
-  const { accessToken, refreshToken } = await AuthService.loginUser(req.body);
+  const { accessToken, refreshToken } = await AuthService.loginUser(
+    req.body,
+    sessionInfo,
+    req.ip as string,
+  );
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -141,6 +153,15 @@ const login = catchAsync(async (req: Request, res: Response) => {
   );
 });
 
+const getAllSessions = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
+  const result = await AuthService.getAllSessions(userId);
+  ApiResponse.success(res, result, "Sessions retrieved successfully");
+});
+
 const logout = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.userId;
   const refreshToken = req.cookies.refreshToken;
@@ -159,6 +180,22 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   res.clearCookie("refreshToken");
 
   ApiResponse.success(res, result, "User logged out successfully");
+});
+
+const logoutSingleSession = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  const sessionId = req.params.sessionId as string;
+
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
+
+  if (!sessionId) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Session ID is required");
+  }
+
+  const result = await AuthService.logoutSingleDevice(userId, sessionId);
+  ApiResponse.success(res, result, "Session logged out successfully");
 });
 
 const logoutAllDevices = catchAsync(async (req: Request, res: Response) => {
@@ -182,7 +219,9 @@ export const AuthController = {
   verifyForgotPasswordOTP,
   resetPassword,
   changePassword,
+  getAllSessions,
   resendOtp,
   logout,
   logoutAllDevices,
+  logoutSingleSession,
 };

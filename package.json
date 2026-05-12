@@ -26,6 +26,7 @@
     "nodemailer": "^8.0.7",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
+    "ua-parser-js": "^2.0.9",
     "zod": "^4.4.3"
   },
   "devDependencies": {

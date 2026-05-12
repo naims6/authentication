@@ -22,7 +22,7 @@ router.post(
 );
 
 // refresh token
-router.post("/refresh-token", isAuthenticated, AuthController.refreshToken);
+router.post("/refresh-token", AuthController.refreshToken);
 
 // verify email
 router.post(
@@ -52,6 +52,9 @@ router.post(
 // login
 router.post("/login", validateRequest(UserLoginSchema), AuthController.login);
 
+// get all sessions
+router.get("/sessions", isAuthenticated, AuthController.getAllSessions);
+
 // resend otp
 router.post(
   "/resend-otp",
@@ -69,6 +72,12 @@ router.post(
 
 // logout
 router.post("/logout", isAuthenticated, AuthController.logout);
+
+router.delete(
+  "/sessions/:sessionId",
+  isAuthenticated,
+  AuthController.logoutSingleSession,
+);
 
 // logout from all devices
 router.post(

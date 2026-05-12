@@ -8,14 +8,16 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   try {
     const cookieToken = req.cookies.accessToken;
     const headerToken = req.headers.authorization?.split(" ")[1];
-
+    console.log({ cookieToken, headerToken });
     const token = headerToken || cookieToken;
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
     }
 
-    const decoded = verifyAccessToken(token) as JwtPayload;
+    console.log("Verifying token:", token);
 
+    const decoded = verifyAccessToken(token) as JwtPayload;
+    console.log("Decoded token:", decoded);
     if (!decoded) {
       throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
     }

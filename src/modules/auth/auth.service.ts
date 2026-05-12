@@ -20,6 +20,7 @@ import {
   verifyRefreshToken,
   verifyResetToken,
 } from "./auth.helper";
+import { IResult } from "ua-parser-js";
 
 const registerUser = async (payload: UserCreate) => {
   const { email, password, fullName } = payload;
@@ -194,6 +195,7 @@ const resetPassword = async (resetToken: string, newPassword: string) => {
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
     data: { password: hashedPassword },
+    select: { id: true, email: true, fullName: true, isVerified: true },
   });
 
   // TODO: Use Transaction
@@ -209,7 +211,6 @@ const resetPassword = async (resetToken: string, newPassword: string) => {
   await prisma.session.deleteMany({
     where: { userId: user.id },
   });
-
 
   return updatedUser;
 };
@@ -339,7 +340,16 @@ const changePassword = async (
   return { newAccessToken, newRefreshToken };
 };
 
-const loginUser = async (payload: UserLogin) => {
+const loginUser = async (
+  payload: UserLogin,
+  sessionInfo: IResult,
+  ip: string,
+) => {
+  console.log({ sessionInfo, ip });
+  const deviceName = sessionInfo.os.name || "Unknown OS";
+  const browserName = sessionInfo.browser.name || "Unknown Browser";
+  console.log(deviceName, browserName);
+
   const { email, password } = payload;
   const user = await prisma.user.findUnique({
     where: { email },
@@ -388,9 +398,23 @@ const loginUser = async (payload: UserLogin) => {
       refreshToken,
       sessionId,
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      deviceInfo: `${deviceName} - ${browserName}`,
+      ipAddress: ip,
     },
   });
   return { accessToken, refreshToken };
+};
+
+const getAllSessions = async (userId: string) => {
+  const sessions = await prisma.session.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      deviceInfo: true,
+      sessionId: true,
+    },
+  });
+  return sessions;
 };
 
 const logoutUser = async (userId: string, refreshToken: string) => {
@@ -418,6 +442,22 @@ const logoutUser = async (userId: string, refreshToken: string) => {
   return session;
 };
 
+const logoutSingleDevice = async (userId: string, sessionId: string) => {
+  const session = await prisma.session.findUnique({
+    where: { userId, sessionId },
+  });
+
+  if (!session) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Session not found");
+  }
+
+  await prisma.session.delete({
+    where: { userId, sessionId },
+  });
+
+  return session;
+};
+
 const logoutAllDevice = async (userId: string) => {
   const result = await prisma.session.deleteMany({
     where: {
@@ -440,8 +480,10 @@ export const AuthService = {
   forgotPassword,
   verifyForgotPasswordOTP,
   resetPassword,
+  getAllSessions,
   changePassword,
   resendOtp,
   logoutUser,
   logoutAllDevice,
+  logoutSingleDevice,
 };
