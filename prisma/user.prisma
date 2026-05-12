@@ -5,8 +5,18 @@ model User {
   fullName          String
   isVerified        Boolean   @default(false)
   isBlocked         Boolean   @default(false)
+  isTrustedDevice   Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+
+  status            UserStatus @default(ACTIVE)
+
+  deletedAt         DateTime?
+  deleteAfter       DateTime?
+
+  bannedUntil       DateTime?
+  banReason         String?
+
   sessions          Session[]
   otps              OTP[]
 }

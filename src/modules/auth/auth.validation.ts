@@ -32,14 +32,41 @@ export const EmailVerifySchema = z.object({
   otp: z.string().regex(/^\d{6}$/, "OTP must be 6 digits"),
 });
 
-// Password Reset
-export const ResetPasswordSchema = z.object({
+// resend OTP
+export const ResendOtpSchema = z.object({
   email: z.email(),
-  newPassword: z.string().min(8),
 });
+
+// email schema for forgot password
+export const EmailSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+// reset password schema
+export const ResetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters"),
+    confirmNewPassword: z
+      .string()
+      .min(6, "Confirm new password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New password and confirm new password do not match",
+  });
+
+// change password
+export const ChangePasswordSchema = z.object({
+  oldPassword: z.string().min(6),
+  newPassword: z.string().min(6),
+  confirmPassword: z.string().min(6),
+});
+
 
 // Type inference
 export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 export type UserLogin = z.infer<typeof UserLoginSchema>;
 export type EmailVerify = z.infer<typeof EmailVerifySchema>;
+export type ChangePassword = z.infer<typeof ChangePasswordSchema>;

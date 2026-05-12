@@ -2,3 +2,10 @@ enum OTPType {
   VERIFICATION
   PASSWORD_RESET
 }
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+  DELETED
+
+}

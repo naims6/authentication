@@ -15,7 +15,6 @@ const globalError: ErrorRequestHandler = (
 
   // Handle known Prisma client errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    console.log(err);
     switch (err.code) {
       case "P1000":
         message = "Authentication failed against the database server.";
