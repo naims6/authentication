@@ -54,7 +54,7 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 
   const refreshToken = req.cookies.refreshToken;
   const userId = req.user?.userId;
-  
+
   if (!userId) {
     throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
   }
@@ -84,6 +84,36 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
     { newAccessToken, newRefreshToken },
     "Password changed successfully",
   );
+});
+
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await AuthService.forgotPassword(email);
+  ApiResponse.success(res, result, "Reset token sent to email successfully");
+});
+
+const verifyForgotPasswordOTP = catchAsync(
+  async (req: Request, res: Response) => {
+    const { email, otp } = req.body;
+    const result = await AuthService.verifyForgotPasswordOTP({ email, otp });
+    ApiResponse.success(res, result, "OTP verified successfully");
+  },
+);
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const { newPassword, confirmNewPassword } = req.body;
+  const resetToken = req.headers.authorization?.split(" ")[1];
+
+  if (!resetToken) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Reset token is required");
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "New password and confirm password do not match");
+  }
+
+  const result = await AuthService.resetPassword(resetToken, newPassword);
+  ApiResponse.success(res, result, "Password reset successfully");
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
@@ -148,6 +178,9 @@ export const AuthController = {
   login,
   verifyEmail,
   refreshToken,
+  forgotPassword,
+  verifyForgotPasswordOTP,
+  resetPassword,
   changePassword,
   resendOtp,
   logout,

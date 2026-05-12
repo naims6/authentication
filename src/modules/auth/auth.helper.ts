@@ -22,6 +22,16 @@ export const verifyRefreshToken = (token: string) => {
   return jwt.verify(token, config.jwt_refresh_secret) as RefreshTokenPayload;
 };
 
+export const createResetToken = (payload: string) => {
+  return jwt.sign({ email: payload }, config.jwt_reset_secret, {
+    expiresIn: "10m",
+  });
+}
+
+export const verifyResetToken = (token: string) => {
+  return jwt.verify(token, config.jwt_reset_secret) as { email: string };
+}
+
 export const generateSessionId = () => {
   return (
     Math.random().toString(36).substring(2, 15) +

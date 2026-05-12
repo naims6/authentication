@@ -3,8 +3,10 @@ import { AuthController } from "./auth.controller";
 import validateRequest from "../../middleware/validateRequest";
 import {
   ChangePasswordSchema,
+  EmailSchema,
   EmailVerifySchema,
   ResendOtpSchema,
+  ResetPasswordSchema,
   UserCreateSchema,
   UserLoginSchema,
 } from "./auth.validation";
@@ -27,6 +29,24 @@ router.post(
   "/verify-email",
   validateRequest(EmailVerifySchema),
   AuthController.verifyEmail,
+);
+
+router.post(
+  "/forgot-password",
+  validateRequest(EmailSchema),
+  AuthController.forgotPassword,
+);
+
+router.post(
+  "/verify-forgot-password-otp",
+  validateRequest(EmailVerifySchema),
+  AuthController.verifyForgotPasswordOTP,
+);
+
+router.post(
+  "/reset-password",
+  validateRequest(ResetPasswordSchema),
+  AuthController.resetPassword,
 );
 
 // login

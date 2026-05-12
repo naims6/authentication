@@ -4,6 +4,7 @@ model OTP {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   code       String
   type       OTPType  @default(VERIFICATION) 
+  isVerified Boolean  @default(false)
   expiresAt  DateTime
   createdAt  DateTime @default(now())
 

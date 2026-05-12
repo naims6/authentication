@@ -15,8 +15,10 @@ import { JwtPayload, RefreshTokenPayload } from "../../types";
 import {
   createAccessToken,
   createRefreshToken,
+  createResetToken,
   generateSessionId,
   verifyRefreshToken,
+  verifyResetToken,
 } from "./auth.helper";
 
 const registerUser = async (payload: UserCreate) => {
@@ -96,6 +98,118 @@ const verifyEmail = async (payload: EmailVerify) => {
   await prisma.oTP.delete({
     where: { id: otpRecord.id },
   });
+
+  return updatedUser;
+};
+
+const forgotPassword = async (email: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (!user) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
+  }
+
+  const otp = generateOTP();
+  const hashedOTP = await hashOTP(otp);
+
+  const otpRecord = await prisma.oTP.upsert({
+    where: {
+      userId_type: {
+        userId: user.id,
+        type: OTPType.PASSWORD_RESET,
+      },
+    },
+    update: {
+      code: hashedOTP,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+    create: {
+      userId: user.id,
+      code: hashedOTP,
+      type: OTPType.PASSWORD_RESET,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+  });
+
+  await sendVerificationEmail(user.email, user.fullName, otp);
+
+  return otpRecord;
+};
+
+const verifyForgotPasswordOTP = async (payload: EmailVerify) => {
+  const { email, otp } = payload;
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
+  }
+
+  const otpRecord = await prisma.oTP.findUnique({
+    where: {
+      userId_type: {
+        userId: user.id,
+        type: OTPType.PASSWORD_RESET,
+      },
+    },
+  });
+
+  if (!otpRecord) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP");
+  }
+
+  if (otpRecord.expiresAt < new Date()) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired");
+  }
+
+  const isOTPValid = await verifyOTP(otp, otpRecord.code);
+
+  if (!isOTPValid) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Wrong OTP");
+  }
+
+  const resetToken = createResetToken(user.email);
+
+  return { resetToken };
+};
+
+const resetPassword = async (resetToken: string, newPassword: string) => {
+  const resetTokenPayload = verifyResetToken(resetToken);
+  if (!resetTokenPayload) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid reset token");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: resetTokenPayload.email },
+  });
+
+  if (!user) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: { password: hashedPassword },
+  });
+
+  // TODO: Use Transaction
+  await prisma.oTP.delete({
+    where: {
+      userId_type: {
+        userId: user.id,
+        type: OTPType.PASSWORD_RESET,
+      },
+    },
+  });
+
+  await prisma.session.deleteMany({
+    where: { userId: user.id },
+  });
+
 
   return updatedUser;
 };
@@ -323,6 +437,9 @@ export const AuthService = {
   loginUser,
   verifyEmail,
   refreshToken,
+  forgotPassword,
+  verifyForgotPasswordOTP,
+  resetPassword,
   changePassword,
   resendOtp,
   logoutUser,

@@ -37,6 +37,25 @@ export const ResendOtpSchema = z.object({
   email: z.email(),
 });
 
+// email schema for forgot password
+export const EmailSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+// reset password schema
+export const ResetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters"),
+    confirmNewPassword: z
+      .string()
+      .min(6, "Confirm new password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New password and confirm new password do not match",
+  });
+
 // change password
 export const ChangePasswordSchema = z.object({
   oldPassword: z.string().min(6),
@@ -44,11 +63,6 @@ export const ChangePasswordSchema = z.object({
   confirmPassword: z.string().min(6),
 });
 
-// Password Reset
-export const ResetPasswordSchema = z.object({
-  email: z.email(),
-  newPassword: z.string().min(8),
-});
 
 // Type inference
 export type UserCreate = z.infer<typeof UserCreateSchema>;
