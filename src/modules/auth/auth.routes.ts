@@ -94,4 +94,10 @@ router.delete(
   AuthController.deleteUserAccount,
 );
 
+// get user
+router.get("/me", isAuthenticated, AuthController.getUser);
+
+// get all users
+router.get("/all-users", isAuthenticated, AuthController.getAllUsers);
+
 export const AuthRoutes = router;
