@@ -63,7 +63,6 @@ export const ChangePasswordSchema = z.object({
   confirmPassword: z.string().min(6),
 });
 
-
 // Type inference
 export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;

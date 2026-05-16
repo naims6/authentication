@@ -210,6 +210,19 @@ const logoutAllDevices = catchAsync(async (req: Request, res: Response) => {
 });
 
 // user part
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.getAllUsers();
+  ApiResponse.success(res, result, "Users retrieved successfully");
+});
+
+const getUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
+  const result = await AuthService.getUser(userId);
+  ApiResponse.success(res, result, "User retrieved successfully");
+});
 
 const deleteUserAccount = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.userId;
@@ -219,6 +232,15 @@ const deleteUserAccount = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.deleteUserAccount(userId);
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
+  ApiResponse.success(res, result, "User account deleted successfully");
+});
+
+const permanentDeleteUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
+  const result = await AuthService.permanentDeleteUser(userId);
   ApiResponse.success(res, result, "User account deleted successfully");
 });
 
@@ -236,6 +258,9 @@ export const AuthController = {
   logout,
   logoutAllDevices,
   logoutSingleSession,
-  // user related 
+  // user relatedg
+  getAllUsers,
+  getUser,
   deleteUserAccount,
+  permanentDeleteUser,
 };
