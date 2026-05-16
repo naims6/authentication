@@ -235,6 +235,15 @@ const deleteUserAccount = catchAsync(async (req: Request, res: Response) => {
   ApiResponse.success(res, result, "User account deleted successfully");
 });
 
+const permanentDeleteUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+  }
+  const result = await AuthService.permanentDeleteUser(userId);
+  ApiResponse.success(res, result, "User account deleted successfully");
+});
+
 export const AuthController = {
   register,
   login,
@@ -253,4 +262,5 @@ export const AuthController = {
   getAllUsers,
   getUser,
   deleteUserAccount,
+  permanentDeleteUser,
 };

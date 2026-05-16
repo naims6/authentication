@@ -100,4 +100,7 @@ router.get("/me", isAuthenticated, AuthController.getUser);
 // get all users
 router.get("/all-users", isAuthenticated, AuthController.getAllUsers);
 
+// permanent delete user
+router.delete("/permanent-delete-user", AuthController.permanentDeleteUser);
+
 export const AuthRoutes = router;
