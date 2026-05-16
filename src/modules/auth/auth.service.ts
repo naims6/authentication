@@ -498,7 +498,7 @@ const getAllUsers = async () => {
     },
   });
 
-  if (!users) {
+  if (users.length === 0) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Users not found");
   }
   return users;
