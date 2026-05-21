@@ -28,31 +28,25 @@ const registerUser = async (payload: UserCreate) => {
   const otp = generateOTP();
   const hashedOTP = await hashOTP(otp);
 
-  const result = await prisma.$transaction(
-    async (tx) => {
-      const newUser = await tx.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          fullName,
-        },
-        select: { id: true, email: true, fullName: true, isVerified: true },
-      });
+  const result = await prisma.$transaction(async (tx) => {
+    const newUser = await tx.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        fullName,
+      },
+      select: { id: true, email: true, fullName: true, isVerified: true },
+    });
 
-      await tx.oTP.create({
-        data: {
-          userId: newUser.id,
-          code: hashedOTP,
-          expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-        },
-      });
-      return newUser;
-    },
-    {
-      maxWait: 10000,
-      timeout: 15000,
-    },
-  );
+    await tx.oTP.create({
+      data: {
+        userId: newUser.id,
+        code: hashedOTP,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      },
+    });
+    return newUser;
+  });
   await sendVerificationEmail(result.email, result.fullName, otp);
 
   return result;
@@ -545,39 +539,7 @@ const deleteUserAccount = async (userId: string) => {
   return deletedUser;
 };
 
-// Hard delete soft deleted users
-const permanentDeleteUser = async (userId: string) => {
-  if (!userId) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "User ID is required");
-  }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
-  if (!user) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
-  }
-
-  if (user.status !== "DELETED") {
-    throw new AppError(StatusCodes.BAD_REQUEST, "User is not deleted");
-  }
-
-  if (!user.deleteAfter) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Delete after date not found");
-  }
-
-  if (user.deleteAfter > new Date()) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "User is not deleted yet");
-  }
-
-  const deletedUser = await prisma.user.delete({
-    where: { id: userId },
-    select: { id: true, fullName: true },
-  });
-
-  return deletedUser;
-};
 
 export const AuthService = {
   registerUser,
@@ -597,5 +559,4 @@ export const AuthService = {
   getAllUsers,
   getUser,
   deleteUserAccount,
-  permanentDeleteUser,
 };

@@ -2,6 +2,7 @@ import { Server } from "http";
 import app from "./app";
 import config from "./config/env";
 import { prisma } from "./lib/prisma";
+import { startCronJobs } from "./schedulers/cron.scheduler";
 
 const bootstrap = async () => {
   let server: Server;
@@ -17,5 +18,7 @@ const bootstrap = async () => {
     process.exit(1);
   }
 };
+
+startCronJobs();
 
 bootstrap();
