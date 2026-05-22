@@ -1,25 +1,26 @@
-export const verificationEmailTemplate = (
-  otp: string,
-  fullName: string,
-  expiriedIn: number,
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+import ejs from "ejs";
+
+export const generateEmailTemplate = async (
+  templateName: string,
+  data: any,
 ) => {
-  return `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Email Verification</h2>
-            <p>Hello ${fullName},</p>
-            <p>Thank you for registering! Please verify your email address by using the verification code below:</p>
-            
-            <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
-                ${otp}
-            </div>
-            
-            <p>This code will expire in ${expiriedIn} minutes.</p>
-            
-            <p>If you didn't create an account with us, please ignore this email.</p>
-            
-            <hr style="margin: 20px 0;" />
-            
-            <p style="color: #666; font-size: 12px;">This is an automated message, please do not reply to this email.</p>
-        </div>
-    `;
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+
+  // const templatePath = `${__dirname}/../templates/${templateName}.ejs`;
+
+  const allowedTemplates = new Set(["otpVerification"]);
+  if (!allowedTemplates.has(templateName)) {
+    throw new Error("Invalid email template");
+  }
+
+  const templatePath = resolve(
+    __dirname,
+    "../templates",
+    `${templateName}.ejs`,
+  );
+
+  return ejs.renderFile(templatePath, data);
 };
