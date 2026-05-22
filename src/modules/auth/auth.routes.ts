@@ -61,6 +61,9 @@ router.post(
   AuthController.login,
 );
 
+// verify two factor
+router.post("/verify-two-factor", AuthController.verifyTwoFactor);
+
 // get all sessions
 router.get("/sessions", isAuthenticated, AuthController.getAllSessions);
 

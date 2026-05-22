@@ -69,3 +69,9 @@ export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 export type UserLogin = z.infer<typeof UserLoginSchema>;
 export type EmailVerify = z.infer<typeof EmailVerifySchema>;
 export type ChangePassword = z.infer<typeof ChangePasswordSchema>;
+
+
+export interface LoginMetadata {
+  ip: string;
+  deviceInfo: string;
+}
