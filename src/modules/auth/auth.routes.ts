@@ -7,6 +7,7 @@ import {
   EmailVerifySchema,
   ResendOtpSchema,
   ResetPasswordSchema,
+  TwoFactorVerifySchema,
   UserCreateSchema,
   UserLoginSchema,
 } from "./auth.validation";
@@ -62,7 +63,12 @@ router.post(
 );
 
 // verify two factor
-router.post("/verify-two-factor", AuthController.verifyTwoFactor);
+router.post(
+  "/verify-two-factor",
+  rateLimiters.otp,
+  validateRequest(TwoFactorVerifySchema),
+  AuthController.verifyTwoFactor,
+);
 
 // get all sessions
 router.get("/sessions", isAuthenticated, AuthController.getAllSessions);

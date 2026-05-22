@@ -420,6 +420,13 @@ const verifyTwoFactor = async (token: string, otp: string) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
 
+  if (user.status === "DELETED" || !user.isVerified) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "Login challenge is no longer valid",
+    );
+  }
+
   const otpRecord = await OTPServices.getOTP("two_factor", user.id);
 
   if (!otpRecord) {
@@ -455,8 +462,6 @@ const verifyTwoFactor = async (token: string, otp: string) => {
     email: user.email,
     sessionId,
   });
-
-  console.log({ parsedMetaData });
 
   const session = await prisma.session.create({
     data: {

@@ -10,6 +10,7 @@ const config = {
   jwt_access_secret: process.env.JWT_ACCESS_SECRET as string,
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET as string,
   jwt_reset_secret: process.env.JWT_RESET_SECRET as string,
+  jwt_two_factor_secret: process.env.JWT_TWO_FACTOR_SECRET as string,
 
   // email configuration
   email_host: process.env.EMAIL_HOST as string,
