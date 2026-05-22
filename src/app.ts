@@ -5,6 +5,7 @@ import globalError from "./middleware/globalError";
 import { AuthRoutes } from "./modules/auth/auth.routes";
 import cookieParser from "cookie-parser";
 import { rateLimiters } from "./middleware/rateLimiter";
+import { settingRoutes } from "./modules/settings/setting.routes";
 
 const createApp = () => {
   const app: Application = express();
@@ -17,13 +18,14 @@ const createApp = () => {
   app.get("/", (_req: Request, res: Response) => {
     res.send({
       status: "ok",
-      message: "server is running",
+      message: "server is running...",
       uptime: process.uptime(),
       time: new Date().toISOString(),
     });
   });
 
   app.use("/api/v1/auth", AuthRoutes);
+  app.use("/api/v1/settings", settingRoutes);
 
   app.use(notFound);
   app.use(globalError);
