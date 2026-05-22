@@ -10,20 +10,21 @@ const bootstrap = async () => {
   try {
     await prisma.$connect();
     console.log("Connected to the database");
+
+    // connect to redis
+    await connectRedis();
+
     server = app.listen(config.port, () => {
       console.log(`Server is running on http://localhost:${config.port}`);
     });
 
-    // connect to redis
-    await connectRedis();
+    // start cron jobs
+    startCronJobs();
   } catch (error) {
     console.log("Server Error", error);
     await prisma.$disconnect();
     process.exit(1);
   }
 };
-
-// start cron jobs
-startCronJobs();
 
 bootstrap();

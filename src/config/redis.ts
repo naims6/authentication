@@ -1,8 +1,14 @@
 import { createClient, RedisClientType } from "redis";
 import config from "./env";
 
+const redis_url = config.redis_url;
+
+if (!redis_url) {
+  throw new Error("Missing required environment variable: REDIS_URL");
+}
+
 const redisClient: RedisClientType = createClient({
-  url: config.redis_url,
+  url: redis_url,
 });
 
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
@@ -12,7 +18,8 @@ const connectRedis = async () => {
   try {
     await redisClient.connect();
   } catch (error) {
-    console.log("Redis Client Error", error);
+    console.error("Redis Client Error", error);
+    throw error;
   }
 };
 

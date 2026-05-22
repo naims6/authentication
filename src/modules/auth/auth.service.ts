@@ -47,11 +47,20 @@ const registerUser = async (payload: UserCreate) => {
     select: { id: true, email: true, fullName: true, isVerified: true },
   });
 
-  // Save OTP to Redis
-  await OTPServices.saveOTP(newUser.id, hashedOTP);
-
-  // Send verification email
-  await sendVerificationEmail(newUser.email, newUser.fullName, otp);
+  try {
+    // Save OTP to Redis
+    await OTPServices.saveOTP("email_verification", newUser.id, hashedOTP);
+    // Send verification email
+    await sendVerificationEmail(newUser.email, newUser.fullName, otp);
+  } catch {
+    await prisma.user.delete({
+      where: { id: newUser.id },
+    });
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Failed to send verification email",
+    );
+  }
 
   return newUser;
 };
@@ -73,7 +82,7 @@ const verifyEmail = async (payload: EmailVerify) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
 
-  const otpRecord = await OTPServices.getOTP(user.id);
+  const otpRecord = await OTPServices.getOTP("email_verification", user.id);
 
   if (!otpRecord) {
     throw new AppError(StatusCodes.BAD_REQUEST, "OTP not found");
@@ -91,7 +100,7 @@ const verifyEmail = async (payload: EmailVerify) => {
     select: { id: true, email: true, fullName: true, isVerified: true },
   });
 
-  await OTPServices.deleteOTP(user.id);
+  await OTPServices.deleteOTP("email_verification", user.id);
 
   return updatedUser;
 };
@@ -109,7 +118,11 @@ const forgotPassword = async (email: string) => {
   const hashedOTP = await hashOTP(otp);
 
   // save otp
-  const otpRecord = await OTPServices.saveOTP(user.id, hashedOTP);
+  const otpRecord = await OTPServices.saveOTP(
+    "password_reset",
+    user.id,
+    hashedOTP,
+  );
   // send email
   await sendVerificationEmail(user.email, user.fullName, otp);
   return otpRecord;
@@ -125,7 +138,7 @@ const verifyForgotPasswordOTP = async (payload: EmailVerify) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
 
-  const otpRecord = await OTPServices.getOTP(user.id);
+  const otpRecord = await OTPServices.getOTP("password_reset", user.id);
 
   if (!otpRecord) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP");
@@ -143,7 +156,7 @@ const verifyForgotPasswordOTP = async (payload: EmailVerify) => {
     EX: 300,
   });
 
-  console.log("Reset token:", resetToken);
+  await OTPServices.deleteOTP("password_reset", user.id);
 
   return { resetToken };
 };
@@ -213,7 +226,11 @@ const resendOtp = async (email: string) => {
   const otp = generateOTP();
   const hashedOTP = await hashOTP(otp);
 
-  const otpRecord = await OTPServices.saveOTP(user.id, hashedOTP);
+  const otpRecord = await OTPServices.saveOTP(
+    "email_verification",
+    user.id,
+    hashedOTP,
+  );
 
   await sendVerificationEmail(user.email, user.fullName, otp);
 

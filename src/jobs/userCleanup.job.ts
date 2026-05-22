@@ -1,15 +1,19 @@
 import { prisma } from "../lib/prisma";
 
-
 export const permanentDeleteUser = async () => {
-  const deletedUser = await prisma.user.deleteMany({
-    where: {
-      status: "DELETED",
-      deleteAfter: {
-        lte: new Date(),
+  try {
+    const deletedUser = await prisma.user.deleteMany({
+      where: {
+        status: "DELETED",
+        deleteAfter: {
+          lte: new Date(),
+        },
       },
-    },
-  });
-
-  return deletedUser;
+    });
+    console.log("Successfully deleted", deletedUser.count, "users");
+    return deletedUser;
+  } catch (error) {
+    console.log("Failed to delete users:", error);
+    throw error;
+  }
 };
