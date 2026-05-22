@@ -2,13 +2,7 @@ import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
 
 import RedisStore from "rate-limit-redis";
 import { redisClient } from "../config/redis";
-
-export interface RateLimiterOptions {
-  windowMs?: number;
-  max?: number;
-  message?: string;
-  prefix: string;
-}
+import { RateLimiterOptions } from "../types";
 
 export const createRateLimiter = ({
   windowMs = 15 * 60 * 1000,
