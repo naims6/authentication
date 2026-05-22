@@ -18,6 +18,5 @@ model User {
   banReason         String?
 
   sessions          Session[]
-  otps              OTP[]
 }
 

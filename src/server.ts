@@ -3,6 +3,7 @@ import app from "./app";
 import config from "./config/env";
 import { prisma } from "./lib/prisma";
 import { startCronJobs } from "./schedulers/cron.scheduler";
+import connectRedis from "./config/redis";
 
 const bootstrap = async () => {
   let server: Server;
@@ -12,6 +13,9 @@ const bootstrap = async () => {
     server = app.listen(config.port, () => {
       console.log(`Server is running on http://localhost:${config.port}`);
     });
+
+    // connect to redis
+    await connectRedis();
   } catch (error) {
     console.log("Server Error", error);
     await prisma.$disconnect();
@@ -19,6 +23,7 @@ const bootstrap = async () => {
   }
 };
 
+// start cron jobs
 startCronJobs();
 
 bootstrap();

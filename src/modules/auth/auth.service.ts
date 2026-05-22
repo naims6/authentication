@@ -10,46 +10,50 @@ import {
   UserCreate,
   UserLogin,
 } from "./auth.validation";
-import { OTPType } from "@prisma/client";
 import { JwtPayload } from "../../types";
 import {
   createAccessToken,
   createRefreshToken,
-  createResetToken,
   generateSessionId,
   verifyRefreshToken,
-  verifyResetToken,
 } from "./auth.helper";
 import { IResult } from "ua-parser-js";
+import { OTPServices } from "../../services/otpServices";
+import { redisClient } from "../../config/redis";
 
 const registerUser = async (payload: UserCreate) => {
   const { email, password, fullName } = payload;
+
+  // Check if user already exists
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUser) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User already exists");
+  }
+
   const hashedPassword = await hashPassword(password);
   const otp = generateOTP();
   const hashedOTP = await hashOTP(otp);
 
-  const result = await prisma.$transaction(async (tx) => {
-    const newUser = await tx.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        fullName,
-      },
-      select: { id: true, email: true, fullName: true, isVerified: true },
-    });
-
-    await tx.oTP.create({
-      data: {
-        userId: newUser.id,
-        code: hashedOTP,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-      },
-    });
-    return newUser;
+  // Create user
+  const newUser = await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      fullName,
+    },
+    select: { id: true, email: true, fullName: true, isVerified: true },
   });
-  await sendVerificationEmail(result.email, result.fullName, otp);
 
-  return result;
+  // Save OTP to Redis
+  await OTPServices.saveOTP(newUser.id, hashedOTP);
+
+  // Send verification email
+  await sendVerificationEmail(newUser.email, newUser.fullName, otp);
+
+  return newUser;
 };
 
 const verifyEmail = async (payload: EmailVerify) => {
@@ -69,24 +73,13 @@ const verifyEmail = async (payload: EmailVerify) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
 
-  const otpRecord = await prisma.oTP.findUnique({
-    where: {
-      userId_type: {
-        userId: user.id,
-        type: OTPType.VERIFICATION,
-      },
-    },
-  });
+  const otpRecord = await OTPServices.getOTP(user.id);
 
   if (!otpRecord) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP");
+    throw new AppError(StatusCodes.BAD_REQUEST, "OTP not found");
   }
 
-  if (otpRecord.expiresAt < new Date()) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired");
-  }
-
-  const isOTPValid = await verifyOTP(otp, otpRecord.code);
+  const isOTPValid = await verifyOTP(otp, otpRecord);
 
   if (!isOTPValid) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Wrong OTP");
@@ -95,11 +88,10 @@ const verifyEmail = async (payload: EmailVerify) => {
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
     data: { isVerified: true },
+    select: { id: true, email: true, fullName: true, isVerified: true },
   });
 
-  await prisma.oTP.delete({
-    where: { id: otpRecord.id },
-  });
+  await OTPServices.deleteOTP(user.id);
 
   return updatedUser;
 };
@@ -108,6 +100,7 @@ const forgotPassword = async (email: string) => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
+
   if (!user) {
     throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
@@ -115,27 +108,10 @@ const forgotPassword = async (email: string) => {
   const otp = generateOTP();
   const hashedOTP = await hashOTP(otp);
 
-  const otpRecord = await prisma.oTP.upsert({
-    where: {
-      userId_type: {
-        userId: user.id,
-        type: OTPType.PASSWORD_RESET,
-      },
-    },
-    update: {
-      code: hashedOTP,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    },
-    create: {
-      userId: user.id,
-      code: hashedOTP,
-      type: OTPType.PASSWORD_RESET,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    },
-  });
-
+  // save otp
+  const otpRecord = await OTPServices.saveOTP(user.id, hashedOTP);
+  // send email
   await sendVerificationEmail(user.email, user.fullName, otp);
-
   return otpRecord;
 };
 
@@ -149,68 +125,48 @@ const verifyForgotPasswordOTP = async (payload: EmailVerify) => {
     throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
 
-  const otpRecord = await prisma.oTP.findUnique({
-    where: {
-      userId_type: {
-        userId: user.id,
-        type: OTPType.PASSWORD_RESET,
-      },
-    },
-  });
+  const otpRecord = await OTPServices.getOTP(user.id);
 
   if (!otpRecord) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP");
   }
 
-  if (otpRecord.expiresAt < new Date()) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired");
-  }
-
-  const isOTPValid = await verifyOTP(otp, otpRecord.code);
+  const isOTPValid = await verifyOTP(otp, otpRecord);
 
   if (!isOTPValid) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Wrong OTP");
   }
 
-  const resetToken = createResetToken(user.email);
+  const resetToken = crypto.randomUUID();
+
+  await redisClient.set(`reset:${resetToken}`, user.id, {
+    EX: 300,
+  });
+
+  console.log("Reset token:", resetToken);
 
   return { resetToken };
 };
 
 const resetPassword = async (resetToken: string, newPassword: string) => {
-  const resetTokenPayload = verifyResetToken(resetToken);
-  if (!resetTokenPayload) {
+  const userId = await redisClient.get(`reset:${resetToken}`);
+
+  if (!userId) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid reset token");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: resetTokenPayload.email },
-  });
-
-  if (!user) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
   }
 
   const hashedPassword = await hashPassword(newPassword);
 
   const updatedUser = await prisma.user.update({
-    where: { id: user.id },
+    where: { id: userId },
     data: { password: hashedPassword },
     select: { id: true, email: true, fullName: true, isVerified: true },
   });
 
-  // TODO: Use Transaction
-  await prisma.oTP.delete({
-    where: {
-      userId_type: {
-        userId: user.id,
-        type: OTPType.PASSWORD_RESET,
-      },
-    },
-  });
+  await redisClient.del(`reset:${resetToken}`);
 
   await prisma.session.deleteMany({
-    where: { userId: user.id },
+    where: { userId: userId },
   });
 
   return updatedUser;
@@ -257,24 +213,7 @@ const resendOtp = async (email: string) => {
   const otp = generateOTP();
   const hashedOTP = await hashOTP(otp);
 
-  const otpRecord = await prisma.oTP.upsert({
-    where: {
-      userId_type: {
-        userId: user.id,
-        type: OTPType.VERIFICATION,
-      },
-    },
-    update: {
-      code: hashedOTP,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    },
-    create: {
-      userId: user.id,
-      code: hashedOTP,
-      type: OTPType.VERIFICATION,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    },
-  });
+  const otpRecord = await OTPServices.saveOTP(user.id, hashedOTP);
 
   await sendVerificationEmail(user.email, user.fullName, otp);
 
@@ -538,8 +477,6 @@ const deleteUserAccount = async (userId: string) => {
 
   return deletedUser;
 };
-
-
 
 export const AuthService = {
   registerUser,
