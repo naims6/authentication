@@ -4,24 +4,31 @@ import notFound from "./middleware/notFound";
 import globalError from "./middleware/globalError";
 import { AuthRoutes } from "./modules/auth/auth.routes";
 import cookieParser from "cookie-parser";
-const app: Application = express();
+import { rateLimiters } from "./middleware/rateLimiter";
 
-app.use(express.json());
-app.use(cors());
-app.use(cookieParser());
+const createApp = () => {
+  const app: Application = express();
 
-app.get("/", (_req: Request, res: Response) => {
-  res.send({
-    status: "ok",
-    message: "server is running",
-    uptime: process.uptime(),
-    time: new Date().toISOString(),
+  app.use(express.json());
+  app.use(cors());
+  app.use(rateLimiters.global);
+  app.use(cookieParser());
+
+  app.get("/", (_req: Request, res: Response) => {
+    res.send({
+      status: "ok",
+      message: "server is running",
+      uptime: process.uptime(),
+      time: new Date().toISOString(),
+    });
   });
-});
 
-app.use("/api/v1/auth", AuthRoutes);
+  app.use("/api/v1/auth", AuthRoutes);
 
-app.use(notFound);
-app.use(globalError);
+  app.use(notFound);
+  app.use(globalError);
 
-export default app;
+  return app;
+};
+
+export default createApp;

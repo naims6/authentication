@@ -11,12 +11,14 @@ import {
   UserLoginSchema,
 } from "./auth.validation";
 import isAuthenticated from "../../middleware/authenticate";
+import { rateLimiters } from "../../middleware/rateLimiter";
 
 const router: Router = Router();
 
 // register
 router.post(
   "/register",
+  rateLimiters.register,
   validateRequest(UserCreateSchema),
   AuthController.register,
 );
@@ -27,12 +29,14 @@ router.post("/refresh-token", AuthController.refreshToken);
 // verify email
 router.post(
   "/verify-email",
+  rateLimiters.otp,
   validateRequest(EmailVerifySchema),
   AuthController.verifyEmail,
 );
 
 router.post(
   "/forgot-password",
+  rateLimiters.forgotPassword,
   validateRequest(EmailSchema),
   AuthController.forgotPassword,
 );
@@ -50,7 +54,12 @@ router.post(
 );
 
 // login
-router.post("/login", validateRequest(UserLoginSchema), AuthController.login);
+router.post(
+  "/login",
+  rateLimiters.login,
+  validateRequest(UserLoginSchema),
+  AuthController.login,
+);
 
 // get all sessions
 router.get("/sessions", isAuthenticated, AuthController.getAllSessions);
