@@ -63,9 +63,21 @@ export const ChangePasswordSchema = z.object({
   confirmPassword: z.string().min(6),
 });
 
+export const TwoFactorVerifySchema = z.object({
+  token: z.string(),
+  otp: z.string().regex(/^\d{6}$/, "OTP must be 6 digits"),
+});
+
 // Type inference
 export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
 export type UserLogin = z.infer<typeof UserLoginSchema>;
 export type EmailVerify = z.infer<typeof EmailVerifySchema>;
 export type ChangePassword = z.infer<typeof ChangePasswordSchema>;
+export type TwoFactorVerify = z.infer<typeof TwoFactorVerifySchema>;
+
+export interface LoginMetadata {
+  ip: string;
+  deviceInfo: string;
+}
+

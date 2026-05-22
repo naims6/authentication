@@ -126,30 +126,59 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const sessionInfo = parser.getResult();
 
   const isProduction = process.env.NODE_ENV === "production";
-  const { accessToken, refreshToken } = await AuthService.loginUser(
+  const result = await AuthService.loginUser(
     req.body,
     sessionInfo,
     req.ip as string,
   );
 
-  res.cookie("accessToken", accessToken, {
+  if (result.requiresTwoFactor) {
+    return ApiResponse.success(
+      res,
+      result,
+      "Two-factor authentication required",
+    );
+  }
+
+  res.cookie("accessToken", result.accessToken, {
     httpOnly: true,
     secure: isProduction,
     sameSite: "strict",
     maxAge: 1000 * 60 * 15,
   });
 
-  res.cookie("refreshToken", refreshToken, {
+  res.cookie("refreshToken", result.refreshToken, {
     httpOnly: true,
     secure: isProduction,
     sameSite: "strict",
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
+  ApiResponse.success(res, result, "User logged in successfully");
+});
+
+const verifyTwoFactor = catchAsync(async (req: Request, res: Response) => {
+  const { token, otp } = req.body;
+  const result = await AuthService.verifyTwoFactor(token, otp);
+
+  res.cookie("accessToken", result.accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 15,
+  });
+
+  res.cookie("refreshToken", result.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
+
   ApiResponse.success(
     res,
-    { accessToken, refreshToken },
-    "User logged in successfully",
+    result,
+    "Two-factor authentication verified successfully",
   );
 });
 
@@ -253,4 +282,5 @@ export const AuthController = {
   getAllUsers,
   getUser,
   deleteUserAccount,
+  verifyTwoFactor,
 };

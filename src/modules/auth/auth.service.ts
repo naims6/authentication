@@ -7,6 +7,7 @@ import { sendVerificationEmail } from "../../utils/sendVerificationEmail";
 import {
   ChangePassword,
   EmailVerify,
+  LoginMetadata,
   UserCreate,
   UserLogin,
 } from "./auth.validation";
@@ -14,8 +15,10 @@ import { JwtPayload } from "../../types";
 import {
   createAccessToken,
   createRefreshToken,
+  createTempLoginToken,
   generateSessionId,
   verifyRefreshToken,
+  verifyTempLoginToken,
 } from "./auth.helper";
 import { IResult } from "ua-parser-js";
 import { OTPServices } from "../../services/otpServices";
@@ -315,6 +318,7 @@ const loginUser = async (
       password: true,
       isVerified: true,
       status: true,
+      isTwoFactorEnabled: true,
     },
   });
 
@@ -342,6 +346,110 @@ const loginUser = async (
     );
   }
 
+  // Two-factor authentication
+  if (user.isTwoFactorEnabled) {
+    const otp = generateOTP();
+
+    const hashedOtp = await hashOTP(otp);
+
+    await OTPServices.saveOTP("two_factor", user.id, hashedOtp);
+
+    const loginChallengeToken = createTempLoginToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    await redisClient.set(
+      `login_challenge:${user.id}`,
+      JSON.stringify({
+        ip,
+        deviceInfo: `${deviceName} - ${browserName}`,
+      }),
+      {
+        EX: 60 * 5,
+      },
+    );
+
+    await sendVerificationEmail(user.email, user.fullName, otp);
+
+    return {
+      requiresTwoFactor: true,
+      loginChallengeToken,
+    };
+  }
+
+  const jwtPayload: JwtPayload = {
+    userId: user.id,
+    email: user.email,
+  };
+
+  const sessionId = generateSessionId();
+  const accessToken = createAccessToken(jwtPayload);
+  const refreshToken = createRefreshToken({
+    userId: user.id,
+    email: user.email,
+    sessionId,
+  });
+
+  await prisma.session.create({
+    data: {
+      userId: user.id,
+      refreshToken,
+      sessionId,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      deviceInfo: `${deviceName} - ${browserName}`,
+      ipAddress: ip,
+    },
+  });
+
+  return { accessToken, refreshToken };
+};
+
+const verifyTwoFactor = async (token: string, otp: string) => {
+  const decodedToken = verifyTempLoginToken(token);
+
+  if (!decodedToken) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid token");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: decodedToken.userId },
+  });
+
+  if (!user) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User not found");
+  }
+
+  if (user.status === "DELETED" || !user.isVerified) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "Login challenge is no longer valid",
+    );
+  }
+
+  const otpRecord = await OTPServices.getOTP("two_factor", user.id);
+
+  if (!otpRecord) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP");
+  }
+
+  const isOtpValid = await verifyOTP(otp, otpRecord);
+
+  if (!isOtpValid) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP");
+  }
+
+  await OTPServices.deleteOTP("two_factor", user.id);
+
+  // get login metadata from redis
+  const metadata = await redisClient.get(`login_challenge:${user.id}`);
+
+  if (!metadata) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Login session expired");
+  }
+
+  const parsedMetaData = JSON.parse(metadata) as LoginMetadata;
+
   const jwtPayload: JwtPayload = {
     userId: user.id,
     email: user.email,
@@ -361,10 +469,11 @@ const loginUser = async (
       refreshToken,
       sessionId,
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-      deviceInfo: `${deviceName} - ${browserName}`,
-      ipAddress: ip,
+      ipAddress: parsedMetaData.ip,
+      deviceInfo: parsedMetaData.deviceInfo,
     },
   });
+
   return { accessToken, refreshToken };
 };
 
@@ -513,4 +622,5 @@ export const AuthService = {
   getAllUsers,
   getUser,
   deleteUserAccount,
+  verifyTwoFactor,
 };

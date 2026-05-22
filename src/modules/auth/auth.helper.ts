@@ -26,11 +26,27 @@ export const createResetToken = (payload: string) => {
   return jwt.sign({ email: payload }, config.jwt_reset_secret, {
     expiresIn: "10m",
   });
-}
+};
 
 export const verifyResetToken = (token: string) => {
   return jwt.verify(token, config.jwt_reset_secret) as { email: string };
-}
+};
+
+export const createTempLoginToken = (payload: {
+  userId: string;
+  email: string;
+}) => {
+  return jwt.sign(payload, config.jwt_two_factor_secret, {
+    expiresIn: "5m",
+  });
+};
+
+export const verifyTempLoginToken = (token: string) => {
+  return jwt.verify(token, config.jwt_two_factor_secret) as {
+    userId: string;
+    email: string;
+  };
+};
 
 export const generateSessionId = () => {
   return (
