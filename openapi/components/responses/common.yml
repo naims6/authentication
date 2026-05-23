@@ -32,7 +32,7 @@ Forbidden:
             type: string
         example:
           success: false
-          message: You are not authorized to access this resource
+          message: You do not have permission to access this resource
 
 NotFound:
   description: Not Found

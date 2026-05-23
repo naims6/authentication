@@ -1,4 +1,6 @@
+import { StatusCodes } from "http-status-codes";
 import { prisma } from "../../lib/prisma";
+import AppError from "../../utils/AppError";
 
 const toggleTwoFactor = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -8,12 +10,12 @@ const toggleTwoFactor = async (userId: string) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new AppError(StatusCodes.UNAUTHORIZED, "User not found");
   }
 
   // Get current two-factor status
   const isTwoFactorEnabled = user.isTwoFactorEnabled;
-  
+
   // Update the user
   const updatedUser = await prisma.user.update({
     where: {
