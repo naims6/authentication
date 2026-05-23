@@ -11,14 +11,12 @@ const config = {
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET as string,
   jwt_reset_secret: process.env.JWT_RESET_SECRET as string,
   jwt_two_factor_secret: process.env.JWT_TWO_FACTOR_SECRET as string,
-
-  // email configuration
-  email_host: process.env.EMAIL_HOST as string,
-  email_user: process.env.EMAIL_USER as string,
-  email_pass: process.env.EMAIL_PASS as string,
   
   // redis configuration
   redis_url: process.env.REDIS_URL as string,
+  
+  // resend email configuration
+  resend_api_key: process.env.RESEND_API_KEY as string,
 } as const;
 
 export default config;

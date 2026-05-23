@@ -1,4 +1,4 @@
-import { sendMail } from "../config/nodemailer.js";
+import { sendMail } from "../config/resend.js";
 import { generateEmailTemplate } from "./generateEmailTemplate.js";
 
 export const sendVerificationEmail = async (
