@@ -35,6 +35,67 @@ register:
     "500":
       $ref: "../components/responses/common.yml#/ServerError"
 
+verify-email:
+  summary: Verify User Email
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "user@example.com"
+            otp:
+              type: string
+              example: "123456"
+          required:
+            - email
+            - otp
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/VerifyEmailSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+resend-otp:
+  summary: Resend OTP
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "user@example.com"
+          required:
+            - email
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/ResendOtpSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
 
 login:
   summary: Login a User
@@ -70,8 +131,8 @@ login:
     "500":
       $ref: "../components/responses/common.yml#/ServerError"
 
-refresh:
-  summary: Refresh User Token
+verify-two-factor:
+  summary: Verify Two-Factor Authentication
   tags:
     - Authentication
   requestBody:
@@ -81,14 +142,307 @@ refresh:
         schema:
           type: object
           properties:
-            refreshToken:
+            email:
               type: string
-              example: "refresh_token_here"
+              example: "user@example.com"
+            otp:
+              type: string
+              example: "123456"
           required:
-            - refreshToken
+            - email
+            - otp
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/VerifyTwoFactorSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+refresh:
+  summary: Refresh User Token
+  tags:
+    - Authentication
+  security:
+    - CookieAuth: []
   responses:
     "200":
       $ref: "../components/responses/auth.yml#/RefreshSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+change-password:
+  summary: Change Password
+  tags:
+    - Authentication
+  security:
+    - CookieAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            oldPassword:
+              type: string
+              example: "currentPassword123"
+            newPassword:
+              type: string
+              example: "newPassword123"
+            confirmNewPassword:
+              type: string
+              example: "newPassword123"
+          required:
+            - oldPassword
+            - newPassword
+            - confirmNewPassword
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/ChangePasswordSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+forgot-password:
+  summary: Forgot Password
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "user@example.com"
+          required:
+            - email
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/ForgotPasswordSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+verify-forgot-password:
+  summary: Verify Forgot Password
+  tags:
+    - Authentication
+  security:
+    - BearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "user@example.com"
+            otp:
+              type: string
+              example: "123456"
+          required:
+            - email
+            - otp
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/VerifyForgotPasswordSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+reset-password:
+  summary: Reset Password
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            newPassword:
+              type: string
+              example: "password123"
+            confirmNewPassword:
+              type: string
+              example: "password123"
+          required:
+            - newPassword
+            - confirmNewPassword
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/ResetPasswordSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+logout:
+  summary: Logout a User
+  tags:
+    - Authentication
+  security:
+    - CookieAuth: []
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/LogoutSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+logout-all:
+  summary: Logout a User from all devices
+  tags:
+    - Authentication
+  security:
+    - CookieAuth: []
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/LogoutAllSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+# get all sessions
+get-all-sessions:
+  summary: Get all sessions
+  tags:
+    - Authentication
+  security:
+    - BearerAuth: []
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/GetAllSessionsSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+delete-session:
+  summary: Delete a session
+  tags:
+    - Authentication
+  security:
+    - BearerAuth: []
+  parameters:
+    - name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Session ID to delete
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/DeleteSessionSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+# user related
+get-user:
+  summary: Get current user
+  tags:
+    - Authentication
+  security:
+    - BearerAuth: []
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/GetUserSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+delete-account:
+  summary: Delete current user
+  tags:
+    - Authentication
+  security:
+    - BearerAuth: []
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/DeleteAccountSuccess"
     "400":
       $ref: "../components/responses/common.yml#/ValidationError"
     "401":

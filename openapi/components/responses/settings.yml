@@ -1,0 +1,19 @@
+ToggleTwoFactorSuccess:
+  description: Two-factor authentication toggled successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          success:
+            type: boolean
+            example: true
+          message:
+            type: string
+            example: "Two-factor authentication toggled successfully"
+          data:
+            type: object
+            properties:
+              isTwoFactorEnabled:
+                type: boolean
+                example: true

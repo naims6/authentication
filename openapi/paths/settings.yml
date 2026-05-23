@@ -1,0 +1,18 @@
+toggle-two-factor:
+  summary: Toggle two-factor authentication
+  description: Toggle two-factor authentication for the current user
+  tags:
+    - Settings
+  security:
+    - BearerAuth: []
+  responses:
+    "200":
+      $ref: "../components/responses/settings.yml#/ToggleTwoFactorSuccess"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "403":
+      $ref: "../components/responses/common.yml#/Forbidden"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"

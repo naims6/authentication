@@ -1,0 +1,5 @@
+BearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: Enter JWT token - "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
