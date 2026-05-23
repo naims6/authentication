@@ -1,7 +1,7 @@
-import catchAsync from "../../utils/catchAsync";
+import catchAsync from "../../utils/catchAsync.js";
 import { Request, Response } from "express";
-import { SettingServices } from "./setting.service";
-import ApiResponse from "../../utils/ApiResponse";
+import { SettingServices } from "./setting.service.js";
+import ApiResponse from "../../utils/ApiResponse.js";
 
 const toggleTwoFactor = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.userId;

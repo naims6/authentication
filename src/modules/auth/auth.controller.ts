@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import ApiResponse from "../../utils/ApiResponse";
-import catchAsync from "../../utils/catchAsync";
-import { AuthService } from "./auth.service";
-import AppError from "../../utils/AppError";
+import ApiResponse from "../../utils/ApiResponse.js";
+import catchAsync from "../../utils/catchAsync.js";
+import { AuthService } from "./auth.service.js";
+import AppError from "../../utils/AppError.js";
 import { StatusCodes } from "http-status-codes";
 import { UAParser } from "ua-parser-js";
 

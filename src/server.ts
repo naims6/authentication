@@ -1,8 +1,8 @@
 import { Server } from "http";
-import config from "./config/env";
-import { prisma } from "./lib/prisma";
-import { startCronJobs } from "./schedulers/cron.scheduler";
-import connectRedis, { redisClient } from "./config/redis";
+import config from "./config/env.js";
+import { prisma } from "./lib/prisma.js";
+import { startCronJobs } from "./schedulers/cron.scheduler.js";
+import connectRedis, { redisClient } from "./config/redis.js";
 
 const bootstrap = async () => {
   let server: Server;
@@ -13,7 +13,7 @@ const bootstrap = async () => {
     await connectRedis();
 
     // Dynamically import createApp after Redis is connected
-    const createApp = (await import("./app")).default;
+    const createApp = (await import("./app.js")).default;
     const app = createApp();
 
     server = app.listen(config.port, () => {

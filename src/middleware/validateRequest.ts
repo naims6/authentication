@@ -1,7 +1,7 @@
 import z from "zod";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import AppError from "../utils/AppError";
+import AppError from "../utils/AppError.js";
 
 const validateRequest = (schema: z.ZodTypeAny) => {
   return (req: Request, res: Response, next: NextFunction) => {

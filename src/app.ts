@@ -1,11 +1,11 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
-import notFound from "./middleware/notFound";
-import globalError from "./middleware/globalError";
-import { AuthRoutes } from "./modules/auth/auth.routes";
+import notFound from "./middleware/notFound.js";
+import globalError from "./middleware/globalError.js";
+import { AuthRoutes } from "./modules/auth/auth.routes.js";
 import cookieParser from "cookie-parser";
-import { rateLimiters } from "./middleware/rateLimiter";
-import { settingRoutes } from "./modules/settings/setting.routes";
+import { rateLimiters } from "./middleware/rateLimiter.js";
+import { settingRoutes } from "./modules/settings/setting.routes.js";
 import fs from "fs";
 import YAML from "yaml";
 import swaggerUi from "swagger-ui-express";

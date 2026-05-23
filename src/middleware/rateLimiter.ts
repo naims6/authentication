@@ -1,4 +1,4 @@
-import { createRateLimiter } from "../utils/createRateLimit";
+import { createRateLimiter } from "../utils/createRateLimit.js";
 
 const loginRateLimiter = createRateLimiter({
   prefix: "login:",
