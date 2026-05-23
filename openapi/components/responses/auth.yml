@@ -1,0 +1,367 @@
+RegisterSuccess:
+  description: User registered successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          data:
+            type: object
+            properties:
+              id:
+                type: string
+              email:
+                type: string
+              fullName:
+                type: string
+              isVerified:
+                type: boolean
+        example:
+          success: true
+          message: User registered successfully
+          data:
+            id: "123e4567-e89b-12d3-a456-426614174000"
+            email: "user@example.com"
+            fullName: "John Doe"
+            isVerified: false
+
+LoginSuccess:
+  description: User logged in successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+          - data
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          data:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              refreshToken:
+                type: string
+        example:
+          success: true
+          message: User logged in successfully
+          data:
+            accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+RefreshSuccess:
+  description: Token refreshed successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+          - data
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          data:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              refreshToken:
+                type: string
+        example:
+          success: true
+          message: Token refreshed successfully
+          data:
+            accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+ResendOtpSuccess:
+  description: OTP resent successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: OTP resent successfully
+
+VerifyEmailSuccess:
+  description: Email verified successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Email verified successfully
+
+VerifyTwoFactorSuccess:
+  description: Two-factor authentication verified successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Two-factor authentication verified successfully
+
+ChangePasswordSuccess:
+  description: Password changed successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Password changed successfully
+
+ForgotPasswordSuccess:
+  description: Forgot password successful
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Password reset otp sent successfully
+
+VerifyForgotPasswordSuccess:
+  description: Forgot password verified successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          data:
+            type: object
+            properties:
+              resetToken:
+                type: string
+        example:
+          success: true
+          message: Forgot password verified successfully
+          data:
+            resetToken: "abc123"
+
+ResetPasswordSuccess:
+  description: Password reset successful
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Password reset successful
+
+LogoutSuccess:
+  description: User logged out successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: User logged out successfully
+
+LogoutAllSuccess:
+  description: User logged out from all devices successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: User logged out from all devices successfully
+
+# Get Session
+GetAllSessionsSuccess:
+  description: Get all sessions successful
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+          - data
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          data:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                deviceInfo:
+                  type: string
+                sessionId:
+                  type: string
+        example:
+          success: true
+          message: Get all sessions successful
+          data:
+            - id: "1"
+              deviceInfo: "Linux Os - Chrome - 127.0.0.1"
+              sessionId: "abc123"
+
+DeleteSessionSuccess:
+  description: Session deleted successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Session deleted successfully
+
+# Get User
+GetUserSuccess:
+  description: Get user successful
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+          - data
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+          data:
+            type: object
+            properties:
+              id:
+                type: string
+              email:
+                type: string
+              fullName:
+                type: string
+              createdAt:
+                type: string
+        example:
+          success: true
+          message: Get user successful
+          data:
+            id: "1"
+            email: "test@example.com"
+            fullName: "Test User"
+            createdAt: "2025-10-15T10:00:00Z"
+
+DeleteAccountSuccess:
+  description: Account deleted successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - success
+          - message
+        properties:
+          success:
+            type: boolean
+          message:
+            type: string
+        example:
+          success: true
+          message: Account deleted successfully

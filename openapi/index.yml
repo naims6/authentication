@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  version: 1.0.0
+  description: API documentation for the Production Auth application
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+  - name: Settings
+    description: User settings operations
+
+components:
+  securitySchemes:
+    BearerAuth:
+      $ref: "./components/security/bearer.yml#/BearerAuth"
+    CookieAuth:
+      $ref: "./components/security/cookie.yml#/cookieAuth"
+
+paths:
+  /auth/register:
+    post:
+      $ref: "./paths/auth.yml#/register"
+  /auth/verify-email:
+    post:
+      $ref: "./paths/auth.yml#/verify-email"
+  /auth/login:
+    post:
+      $ref: "./paths/auth.yml#/login"
+  /auth/resend-otp:
+    post:
+      $ref: "./paths/auth.yml#/resend-otp"
+  /auth/verify-two-factor:
+    post:
+      $ref: "./paths/auth.yml#/verify-two-factor"
+  /auth/refresh:
+    post:
+      $ref: "./paths/auth.yml#/refresh"
+  /auth/change-password:
+    post:
+      $ref: "./paths/auth.yml#/change-password"
+  /auth/forgot-password:
+    post:
+      $ref: "./paths/auth.yml#/forgot-password"
+  /auth/verify-forgot-password:
+    post:
+      $ref: "./paths/auth.yml#/verify-forgot-password"
+  /auth/reset-password:
+    post:
+      $ref: "./paths/auth.yml#/reset-password"
+  /auth/logout:
+    post:
+      $ref: "./paths/auth.yml#/logout"
+  /auth/logout-all:
+    post:
+      $ref: "./paths/auth.yml#/logout-all"
+  # get all sessions
+  /auth/sessions:
+    get:
+      $ref: "./paths/auth.yml#/get-all-sessions"
+  /auth/session/{sessionId}:
+    delete:
+      $ref: "./paths/auth.yml#/delete-session"
+  # user related
+  /auth/me:
+    get:
+      $ref: "./paths/auth.yml#/get-user"
+  /auth/delete-account:
+    delete:
+      $ref: "./paths/auth.yml#/delete-account"
+  # settings related
+  /settings/toggle-two-factor:
+    patch:
+      $ref: "./paths/settings.yml#/toggle-two-factor"

@@ -1,0 +1,1434 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auth API",
+    "version": "1.0.0",
+    "description": "API documentation for the Production Auth application"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User authentication operations"
+    },
+    {
+      "name": "Settings",
+      "description": "User settings operations"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter JWT token - \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\""
+      },
+      "CookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refreshToken"
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new User",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "description": "User's full name",
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "fullName",
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "fullName": {
+                          "type": "string"
+                        },
+                        "isVerified": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "User registered successfully",
+                    "data": {
+                      "id": "123e4567-e89b-12d3-a456-426614174000",
+                      "email": "user@example.com",
+                      "fullName": "John Doe",
+                      "isVerified": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "summary": "Verify User Email",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "otp": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                },
+                "required": [
+                  "email",
+                  "otp"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Email verified successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login a User",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "refreshToken": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "User logged in successfully",
+                    "data": {
+                      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/resend-otp": {
+      "post": {
+        "summary": "Resend OTP",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP resent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "OTP resent successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/verify-two-factor": {
+      "post": {
+        "summary": "Verify Two-Factor Authentication",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "otp": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                },
+                "required": [
+                  "email",
+                  "otp"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Two-factor authentication verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Two-factor authentication verified successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh User Token",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "refreshToken": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Token refreshed successfully",
+                    "data": {
+                      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/change-password": {
+      "post": {
+        "summary": "Change Password",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "oldPassword": {
+                    "type": "string",
+                    "example": "currentPassword123"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "example": "newPassword123"
+                  },
+                  "confirmNewPassword": {
+                    "type": "string",
+                    "example": "newPassword123"
+                  }
+                },
+                "required": [
+                  "oldPassword",
+                  "newPassword",
+                  "confirmNewPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Password changed successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Forgot Password",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Forgot password successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Password reset otp sent successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/verify-forgot-password": {
+      "post": {
+        "summary": "Verify Forgot Password",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "otp": {
+                    "type": "string",
+                    "example": "123456"
+                  }
+                },
+                "required": [
+                  "email",
+                  "otp"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Forgot password verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "resetToken": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Forgot password verified successfully",
+                    "data": {
+                      "resetToken": "abc123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Reset Password",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newPassword": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "confirmNewPassword": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": [
+                  "newPassword",
+                  "confirmNewPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Password reset successful"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout a User",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User logged out successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "User logged out successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/logout-all": {
+      "post": {
+        "summary": "Logout a User from all devices",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User logged out from all devices successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "User logged out from all devices successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/sessions": {
+      "get": {
+        "summary": "Get all sessions",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get all sessions successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "deviceInfo": {
+                            "type": "string"
+                          },
+                          "sessionId": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Get all sessions successful",
+                    "data": [
+                      {
+                        "id": "1",
+                        "deviceInfo": "Linux Os - Chrome - 127.0.0.1",
+                        "sessionId": "abc123"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/session/{sessionId}": {
+      "delete": {
+        "summary": "Delete a session",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Session ID to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Session deleted successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Get current user",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get user successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "fullName": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Get user successful",
+                    "data": {
+                      "id": "1",
+                      "email": "test@example.com",
+                      "fullName": "Test User",
+                      "createdAt": "2025-10-15T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "Validation failed"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "You are not authorized to access this resource"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "Resource not found"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "Too many requests, please try again later"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "Internal server error"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/delete-account": {
+      "delete": {
+        "summary": "Delete current user",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": true,
+                    "message": "Account deleted successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1auth~1me/get/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "429": {
+            "$ref": "#/paths/~1auth~1me/get/responses/429"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    },
+    "/settings/toggle-two-factor": {
+      "patch": {
+        "summary": "Toggle two-factor authentication",
+        "description": "Toggle two-factor authentication for the current user",
+        "tags": [
+          "Settings"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Two-factor authentication toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Two-factor authentication toggled successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "isTwoFactorEnabled": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/paths/~1auth~1me/get/responses/401"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "message"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "success": false,
+                    "message": "You are not authorized to access this resource"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/paths/~1auth~1me/get/responses/404"
+          },
+          "500": {
+            "$ref": "#/paths/~1auth~1me/get/responses/500"
+          }
+        }
+      }
+    }
+  }
+}
