@@ -1,0 +1,101 @@
+register:
+  summary: Register a new User
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            fullName:
+              type: string
+              description: User's full name
+              example: "John Doe"
+            email:
+              type: string
+              example: "user@example.com"
+            password:
+              type: string
+              example: "password123"
+          required:
+            - fullName
+            - email
+            - password
+  responses:
+    "201":
+      $ref: "../components/responses/auth.yml#/RegisterSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+
+login:
+  summary: Login a User
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: "user@example.com"
+            password:
+              type: string
+              example: "password123"
+          required:
+            - email
+            - password
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/LoginSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"
+
+refresh:
+  summary: Refresh User Token
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            refreshToken:
+              type: string
+              example: "refresh_token_here"
+          required:
+            - refreshToken
+  responses:
+    "200":
+      $ref: "../components/responses/auth.yml#/RefreshSuccess"
+    "400":
+      $ref: "../components/responses/common.yml#/ValidationError"
+    "401":
+      $ref: "../components/responses/common.yml#/Unauthorized"
+    "404":
+      $ref: "../components/responses/common.yml#/NotFound"
+    "429":
+      $ref: "../components/responses/common.yml#/TooManyRequests"
+    "500":
+      $ref: "../components/responses/common.yml#/ServerError"

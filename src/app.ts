@@ -6,6 +6,9 @@ import { AuthRoutes } from "./modules/auth/auth.routes";
 import cookieParser from "cookie-parser";
 import { rateLimiters } from "./middleware/rateLimiter";
 import { settingRoutes } from "./modules/settings/setting.routes";
+import fs from "fs";
+import YAML from "yaml";
+import swaggerUi from "swagger-ui-express";
 
 const createApp = () => {
   const app: Application = express();
@@ -15,6 +18,10 @@ const createApp = () => {
   app.use(rateLimiters.global);
   app.use(cookieParser());
 
+  // configure swagger
+  const file = fs.readFileSync("./swagger.yml", "utf-8");
+  const parsedFile = YAML.parse(file);
+
   app.get("/", (_req: Request, res: Response) => {
     res.send({
       status: "ok",
@@ -23,6 +30,9 @@ const createApp = () => {
       time: new Date().toISOString(),
     });
   });
+
+  // api docs with swagger
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(parsedFile));
 
   app.use("/api/v1/auth", AuthRoutes);
   app.use("/api/v1/settings", settingRoutes);

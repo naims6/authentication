@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  version: 1.0.0
+  description: API documentation for the Production Auth application
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+
+paths:
+  /auth/register:
+    post:
+      $ref: "./paths/auth.yml#/register"
+  /auth/login:
+    post:
+      $ref: "./paths/auth.yml#/login"
+  /auth/refresh:
+    post:
+      $ref: "./paths/auth.yml#/refresh"
