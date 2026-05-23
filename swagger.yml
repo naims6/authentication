@@ -9,6 +9,10 @@
     {
       "url": "http://localhost:5000/api/v1",
       "description": "Local development server"
+    },
+    {
+      "url": "https://authentication-d5jy.onrender.com/api/v1",
+      "description": "Production server"
     }
   ],
   "tags": [
@@ -1415,7 +1419,7 @@
                   },
                   "example": {
                     "success": false,
-                    "message": "You are not authorized to access this resource"
+                    "message": "You do not have permission to access this resource"
                   }
                 }
               }
