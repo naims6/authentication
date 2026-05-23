@@ -54,7 +54,7 @@ A Secure, robust, and production-grade **Authentication API server** built using
 | **Redis** | In-memory store for rate limiting and session validation |
 | **Prisma** | Modern database toolkit and query builder (ORM) |
 | **JSON Web Tokens (JWT)** | Stateless authentication standards |
-| **Nodemailer** | EJS-templated email delivery service (SMTP) |
+| **RESEND EMAIL** | Email delivery service |
 | **Docker** | Containerized postgres/redis environment orchestration |
 | **Swagger UI** | Interactive API browser & documentation generator |
 
@@ -143,10 +143,8 @@ JWT_REFRESH_SECRET="your_refresh_token_secret"
 JWT_RESET_SECRET="your_reset_password_secret"
 JWT_TWO_FACTOR_SECRET="your_two_factor_auth_secret"
 
-# SMTP Email Configuration (Nodemailer)
-EMAIL_HOST="smtp.mailtrap.io"
-EMAIL_USER="your_smtp_username"
-EMAIL_PASS="your_smtp_password"
+# Email Configuration (Resend Email)
+RESEND_API_KEY=re_19zDYwTy_2xJhoHED2DJP2h25Jp6VL9R6
 ```
 
 ---
