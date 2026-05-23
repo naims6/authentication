@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { SettingController } from "./setting.controller";
-import isAuthenticated from "../../middleware/authenticate";
+import { SettingController } from "./setting.controller.js";
+import isAuthenticated from "../../middleware/authenticate.js";
 
 const router: Router = Router();
 

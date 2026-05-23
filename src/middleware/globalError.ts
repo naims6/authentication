@@ -1,8 +1,8 @@
 import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
-import { ErrorResponse } from "../types";
-import config from "../config/env";
+import { ErrorResponse } from "../types/index.js";
+import config from "../config/env.js";
 
 const globalError: ErrorRequestHandler = (
   err: any,

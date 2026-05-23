@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../lib/prisma";
-import AppError from "../../utils/AppError";
+import { prisma } from "../../lib/prisma.js";
+import AppError from "../../utils/AppError.js";
 
 const toggleTwoFactor = async (userId: string) => {
   const user = await prisma.user.findUnique({

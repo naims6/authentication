@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { JwtPayload } from "../types";
-import AppError from "../utils/AppError";
-import { verifyAccessToken } from "../modules/auth/auth.helper";
+import { JwtPayload } from "../types/index.js";
+import AppError from "../utils/AppError.js";
+import { verifyAccessToken } from "../modules/auth/auth.helper.js";
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../lib/prisma.js";
 
 const isAuthenticated = async (
   req: Request,

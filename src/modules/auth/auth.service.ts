@@ -1,17 +1,17 @@
 import { StatusCodes } from "http-status-codes";
-import { prisma } from "../../lib/prisma";
-import AppError from "../../utils/AppError";
-import { hashPassword, verifyPassword } from "../../utils/hashPassword";
-import { generateOTP, hashOTP, verifyOTP } from "../../utils/otp";
-import { sendVerificationEmail } from "../../utils/sendVerificationEmail";
+import { prisma } from "../../lib/prisma.js";
+import AppError from "../../utils/AppError.js";
+import { hashPassword, verifyPassword } from "../../utils/hashPassword.js";
+import { generateOTP, hashOTP, verifyOTP } from "../../utils/otp.js";
+import { sendVerificationEmail } from "../../utils/sendVerificationEmail.js";
 import {
   ChangePassword,
   EmailVerify,
   LoginMetadata,
   UserCreate,
   UserLogin,
-} from "./auth.validation";
-import { JwtPayload } from "../../types";
+} from "./auth.validation.js";
+import { JwtPayload } from "../../types/index.js";
 import {
   createAccessToken,
   createRefreshToken,
@@ -19,10 +19,10 @@ import {
   generateSessionId,
   verifyRefreshToken,
   verifyTempLoginToken,
-} from "./auth.helper";
+} from "./auth.helper.js";
 import { IResult } from "ua-parser-js";
-import { OTPServices } from "../../services/otpServices";
-import { redisClient } from "../../config/redis";
+import { OTPServices } from "../../services/otpServices.js";
+import { redisClient } from "../../config/redis.js";
 
 const registerUser = async (payload: UserCreate) => {
   const { email, password, fullName } = payload;
